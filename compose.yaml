@@ -1,0 +1,64 @@
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: cowrie
+
+    ports:
+      - "192.168.56.10:2222:2222/tcp"
+
+    volumes:
+      - ./data/cowrie-var:/cowrie/cowrie-git/var
+
+    networks:
+      - honeynet
+
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 256
+
+    logging:
+      driver: "none"
+
+    security_opt:
+      - no-new-privileges:true
+
+  opencanary:
+    image: deception-opencanary:stable
+    container_name: opencanary
+
+    command:
+      - --dev
+      - --uid=nobody
+      - --gid=nogroup
+
+    ports:
+      - "192.168.56.10:8080:8081/tcp"
+      - "192.168.56.10:21:21/tcp"
+
+    volumes:
+      - ./data/opencanary-config/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
+      - ./data/opencanary-logs:/var/tmp
+
+    networks:
+      - honeynet
+
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 128
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: "none"
+
+networks:
+  honeynet:
+    driver: bridge
+
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "false"
+
+    ipam:
+      config:
+        - subnet: 172.30.10.0/24

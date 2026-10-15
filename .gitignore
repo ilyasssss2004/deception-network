@@ -1,0 +1,28 @@
+/data/cowrie-var/
+/logs/
+.env
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local honeypot records and sensitive captured credentials
+/data/deception.sqlite3
+/data/deception.sqlite3-*
+/data/*.db
+/data/*.sqlite
+/data/*.sqlite3
+/data/opencanary-logs/
+
+# Local-only runtime data and captured credentials
+/data/cowrie-var/
+/data/opencanary-config/
+/data/opencanary-logs/
+/data/deception.sqlite3*
+/data/*.db
+/data/*.sqlite*
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.bak
+*.log

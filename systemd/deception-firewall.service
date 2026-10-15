@@ -1,0 +1,14 @@
+[Unit]
+Description=Deception Network firewall isolation
+Requires=docker.service
+After=docker.service
+Before=deception-network.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/deception-firewall.sh
+
+[Install]
+WantedBy=multi-user.target
