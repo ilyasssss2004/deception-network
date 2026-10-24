@@ -3,8 +3,12 @@ services:
     image: cowrie/cowrie:latest
     container_name: cowrie
 
+    environment:
+      COWRIE_TELNET_ENABLED: "yes"
+
     ports:
       - "192.168.56.10:2222:2222/tcp"
+      - "192.168.56.10:2223:2223/tcp"
 
     volumes:
       - ./data/cowrie-var:/cowrie/cowrie-git/var
