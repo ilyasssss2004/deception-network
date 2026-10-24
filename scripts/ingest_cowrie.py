@@ -73,6 +73,7 @@ OPEN_CANARY_TYPES = {
     2000: "opencanary.ftp.login_attempt",
     2001: "opencanary.ftp.auth_initiated",
     3000: "opencanary.http.get",
+    5000: "opencanary.smb.audit",
     3001: "opencanary.http.post_login_attempt",
     3002: "opencanary.http.unimplemented_method",
     3003: "opencanary.http.redirect",
@@ -232,14 +233,35 @@ def opencanary_row(event: dict[str, Any]) -> tuple | None:
     if not isinstance(logdata, dict):
         logdata = {}
 
+    is_smb = logtype == 5000
     path = logdata.get("PATH")
     host = logdata.get("HOSTNAME")
-    username = logdata.get("USERNAME")
+    username = logdata.get("USER") if is_smb else logdata.get("USERNAME")
+
+    def safe_smb_field(name: str, limit: int = 200) -> str | None:
+        value = logdata.get(name)
+        if not isinstance(value, str):
+            return None
+        cleaned = " ".join(value.split())
+        return cleaned[:limit] if cleaned else None
+
+    smb_action = safe_smb_field("AUDITACTION") if is_smb else None
+    smb_share = safe_smb_field("SHARENAME") if is_smb else None
+    smb_filename = safe_smb_field("FILENAME") if is_smb else None
+    smb_status = safe_smb_field("STATUS") if is_smb else None
+
+    event_input = path if isinstance(path, str) else None
+    if is_smb and event_input is None:
+        event_input = smb_filename or smb_action
 
     eventid = OPEN_CANARY_TYPES.get(
         logtype, f"opencanary.logtype.{logtype}"
     )
-    protocol = "ftp" if logtype in (2000, 2001) else "http"
+    protocol = (
+        "ftp" if logtype in (2000, 2001)
+        else "smb" if is_smb
+        else "http"
+    )
 
     # Do not persist the nested raw payload: it may contain passwords.
     if logtype == 2000:
@@ -254,6 +276,19 @@ def opencanary_row(event: dict[str, Any]) -> tuple | None:
         message = "OpenCanary observed an unsupported HTTP method"
     elif logtype == 3003:
         message = "OpenCanary observed HTTP redirect activity"
+    elif logtype == 5000:
+        details = []
+        for label, value in (
+            ("action", smb_action),
+            ("share", smb_share),
+            ("status", smb_status),
+            ("file", smb_filename),
+        ):
+            if value:
+                details.append(f"{label}={value}")
+        message = "OpenCanary observed SMB audit activity"
+        if details:
+            message += "; " + "; ".join(details)
     else:
         message = f"OpenCanary event type {logtype}; raw payload omitted"
 
@@ -276,7 +311,7 @@ def opencanary_row(event: dict[str, Any]) -> tuple | None:
         "src_port": src_port,
         "dst_port": dst_port,
         "username": username,
-        "input": path,
+        "input": event_input,
         "protocol": protocol,
     }
 
@@ -294,7 +329,7 @@ def opencanary_row(event: dict[str, Any]) -> tuple | None:
         None,  # OpenCanary has no Cowrie session ID.
         username if isinstance(username, str) else None,
         None,  # Never store plaintext passwords.
-        path if isinstance(path, str) else None,
+        event_input,
         protocol,
         None,
         url,

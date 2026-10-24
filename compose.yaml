@@ -42,6 +42,7 @@ services:
     volumes:
       - ./data/opencanary-config/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
       - ./data/opencanary-logs:/var/tmp
+      - /var/log/samba-audit.log:/var/log/samba-audit.log:ro
 
     networks:
       - honeynet

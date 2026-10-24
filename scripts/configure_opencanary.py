@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Configure local OpenCanary HTTP and FTP services."""
+"""Configure OpenCanary HTTP, FTP, and SMB audit monitoring."""
 
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ if not path.is_file():
 
 config = json.loads(path.read_text())
 
-# Disable every configured service, then enable only HTTP and FTP.
+# Disable other service modules, then enable the lab services.
 for key, value in list(config.items()):
     if key.endswith(".enabled") and isinstance(value, bool):
         config[key] = False
@@ -26,9 +26,11 @@ config.update({
     "ftp.enabled": True,
     "ftp.port": 21,
     "ftp.banner": "FTP server ready",
+    "smb.enabled": True,
+    "smb.auditfile": "/var/log/samba-audit.log",
 })
 
-# Keep OpenCanary's raw events in its protected persistent file only.
+# Keep raw OpenCanary events in the protected persistent log only.
 config["logger"] = {
     "class": "PyLogger",
     "kwargs": {
@@ -49,5 +51,6 @@ path.write_text(json.dumps(config, indent=2) + "\n")
 path.chmod(0o640)
 
 print("OpenCanary configured.")
-print("Enabled services: HTTP, FTP")
+print("Enabled services: HTTP, FTP, SMB audit monitoring")
+print("SMB audit file: /var/log/samba-audit.log")
 print("Raw event logs remain local-only.")

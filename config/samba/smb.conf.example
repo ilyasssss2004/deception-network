@@ -1,0 +1,38 @@
+[global]
+   workgroup = WORKGROUP
+   server string = Deception Network SMB Decoy
+   netbios name = DECOYSMB
+
+   server role = standalone server
+   security = user
+
+   server min protocol = SMB2
+   smb ports = 445
+
+   interfaces = lo 192.168.56.10/24
+   bind interfaces only = yes
+   hosts allow = 127.0.0.1 192.168.56.0/24
+
+   load printers = no
+   disable spoolss = yes
+   printing = bsd
+   printcap name = /dev/null
+
+   log file = /var/log/samba/log.%m
+   max log size = 1000
+
+[decoyshare]
+   comment = Fictional SMB Honeypot Share
+   path = /srv/deception-smb/decoyshare
+
+   browseable = yes
+   guest ok = no
+   read only = yes
+   valid users = smbdecoy
+
+   vfs objects = full_audit
+   full_audit:prefix = %U|%I|%i|%m|%S|%L|%R|%a|%T|%D
+   full_audit:success = connect disconnect fdopendir readdir open close read pread
+   full_audit:failure = all
+   full_audit:facility = LOCAL7
+   full_audit:priority = NOTICE
