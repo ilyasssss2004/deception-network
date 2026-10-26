@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Deception Network detection pipeline periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=15s
+Unit=deception-pipeline.service
+
+[Install]
+WantedBy=timers.target

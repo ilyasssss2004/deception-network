@@ -1,0 +1,15 @@
+[Unit]
+Description=Deception Network threat-intelligence enrichment
+
+[Service]
+Type=oneshot
+User=vboxuser
+Group=vboxuser
+WorkingDirectory=/home/vboxuser/deception-network
+EnvironmentFile=-/home/vboxuser/deception-network/.env
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+ExecStart=/home/vboxuser/deception-network/scripts/run_enrichment.sh
+TimeoutStartSec=45min
+NoNewPrivileges=true
+ProtectSystem=full

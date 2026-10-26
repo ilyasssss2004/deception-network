@@ -1,0 +1,15 @@
+[Unit]
+Description=Deception Network local detection pipeline
+
+[Service]
+Type=oneshot
+User=vboxuser
+Group=vboxuser
+WorkingDirectory=/home/vboxuser/deception-network
+EnvironmentFile=-/home/vboxuser/deception-network/.env
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+ExecStart=/home/vboxuser/deception-network/scripts/run_pipeline.sh
+TimeoutStartSec=15min
+NoNewPrivileges=true
+ProtectSystem=full

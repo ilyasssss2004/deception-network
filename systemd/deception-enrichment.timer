@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Deception Network threat-intelligence enrichment periodically
+
+[Timer]
+OnBootSec=7min
+OnUnitActiveSec=30min
+AccuracySec=30s
+Unit=deception-enrichment.service
+
+[Install]
+WantedBy=timers.target

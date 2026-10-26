@@ -63,9 +63,18 @@ done
 
 "$IPT" -w -I DOCKER-USER 1 -j DECEPTION-HONEYPOT
 
-# Prevent containers in this subnet from accessing host services.
-if ! "$IPT" -w -C INPUT -s "$SUBNET" -j DROP 2>/dev/null; then
-    "$IPT" -w -I INPUT 1 -s "$SUBNET" -j DROP
-fi
+# Reconcile these rules on every run to guarantee correct ordering.
+# Permit replies to connections initiated by the host, but no new
+# container-initiated connections to host services.
+while "$IPT" -w -C INPUT -s "$SUBNET" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 2>/dev/null; do
+    "$IPT" -w -D INPUT -s "$SUBNET" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+done
+
+while "$IPT" -w -C INPUT -s "$SUBNET" -j DROP 2>/dev/null; do
+    "$IPT" -w -D INPUT -s "$SUBNET" -j DROP
+done
+
+"$IPT" -w -I INPUT 1 -s "$SUBNET" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+"$IPT" -w -I INPUT 2 -s "$SUBNET" -j DROP
 
 echo "Deception Network firewall rules applied."

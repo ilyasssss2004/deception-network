@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate the weekly Deception Network report every Monday
+
+[Timer]
+OnCalendar=Mon *-*-* 00:10:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=deception-weekly-report.service
+
+[Install]
+WantedBy=timers.target
