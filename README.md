@@ -1011,3 +1011,10 @@ and improving centralized alert/report integration for a future SIEM.
 
 **This project is an isolated deception-telemetry and analysis component for
 SOC-oriented learning and portfolio demonstration.**
+
+## Public Sample Validation Report
+
+The [Lab Validation Report](docs/examples/sample-validation-report.pdf) demonstrates
+the honeypot pipeline's observed activity, session analysis, captured-file hashes,
+and threat-intelligence enrichment results. The report is a lab validation artifact;
+it should not be interpreted as evidence of real-world malware collection.
